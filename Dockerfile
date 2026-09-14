@@ -134,8 +134,11 @@ CMD ["/start.sh"]
 FROM base AS downloader
 
 ARG HUGGINGFACE_ACCESS_TOKEN
+ARG CIVITAI_ACCESS_TOKEN
+ARG DOCKERHUB_ACCESS_TOKEN
+ARG GITHUB_ACCESS_TOKEN
 # Set default model type if none is provided
-ARG MODEL_TYPE=flux1-dev-fp8
+ARG MODEL_TYPE=sdxl-civitai
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
@@ -144,6 +147,10 @@ WORKDIR /comfyui
 RUN mkdir -p models/checkpoints models/vae models/unet models/clip models/text_encoders models/diffusion_models models/model_patches
 
 # Download checkpoints/vae/unet/clip models to include in image based on model type
+RUN if [ "$MODEL_TYPE" = "sdxl-civitai" ]; then \
+      wget -q --content-disposition --header="Authorization: Bearer ${CIVITAI_ACCESS_TOKEN}" -O models/checkpoints/civitai_sdxl_model.safetensors "https://civitai.red/api/download/models/2317633?fileId=2208106"; \
+    fi
+
 RUN if [ "$MODEL_TYPE" = "sdxl" ]; then \
       wget -q -O models/checkpoints/sd_xl_base_1.0.safetensors https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors && \
       wget -q -O models/vae/sdxl_vae.safetensors https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors && \

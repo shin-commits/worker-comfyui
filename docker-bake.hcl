@@ -35,8 +35,20 @@ variable "HUGGINGFACE_ACCESS_TOKEN" {
   default = ""
 }
 
+variable "CIVITAI_ACCESS_TOKEN" {
+  default = ""
+}
+
+variable "DOCKERHUB_ACCESS_TOKEN" {
+  default = ""
+}
+
+variable "GITHUB_ACCESS_TOKEN" {
+  default = ""
+}
+
 group "default" {
-  targets = ["base", "sdxl", "sd3", "flux1-schnell", "flux1-dev", "flux1-dev-fp8", "z-image-turbo", "base-cuda12-8-1"]
+  targets = ["base", "sdxl-civitai", "sdxl", "sd3", "flux1-schnell", "flux1-dev", "flux1-dev-fp8", "z-image-turbo", "base-cuda12-8-1"]
 }
 
 target "base" {
@@ -53,6 +65,25 @@ target "base" {
     MODEL_TYPE = "base"
   }
   tags = ["${DOCKERHUB_REPO}/${DOCKERHUB_IMG}:${RELEASE_VERSION}-base"]
+}
+
+target "sdxl-civitai" {
+  context = "."
+  dockerfile = "Dockerfile"
+  target = "final"
+  args = {
+    BASE_IMAGE = "${BASE_IMAGE}"
+    COMFYUI_VERSION = "${COMFYUI_VERSION}"
+    CUDA_VERSION_FOR_COMFY = "${CUDA_VERSION_FOR_COMFY}"
+    ENABLE_PYTORCH_UPGRADE = "${ENABLE_PYTORCH_UPGRADE}"
+    PYTORCH_INDEX_URL = "${PYTORCH_INDEX_URL}"
+    MODEL_TYPE = "sdxl-civitai"
+    CIVITAI_ACCESS_TOKEN = "${CIVITAI_ACCESS_TOKEN}"
+    DOCKERHUB_ACCESS_TOKEN = "${DOCKERHUB_ACCESS_TOKEN}"
+    GITHUB_ACCESS_TOKEN = "${GITHUB_ACCESS_TOKEN}"
+  }
+  tags = ["${DOCKERHUB_REPO}/${DOCKERHUB_IMG}:${RELEASE_VERSION}-sdxl-civitai"]
+  inherits = ["base"]
 }
 
 target "sdxl" {
